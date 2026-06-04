@@ -360,6 +360,11 @@
 .markdown-body pre code {
   background-color: transparent !important;
 }
+.output-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 
 .btn-copy-icon {
   background: transparent;

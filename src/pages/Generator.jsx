@@ -23,6 +23,33 @@ const Generator = () => {
     navigator.clipboard.writeText(markdownOutput);
   };
 
+  const handleDownloadFile = () => {
+    if (!markdownOutput) return;
+
+    let fileName = 'README.md';
+    if (repoUrl) {
+      try {
+        const parts = repoUrl.trim().split('/');
+        const repoName = parts[parts.length - 1] || parts[parts.length - 2];
+        if (repoName) {
+          fileName = `${repoName.replace(/\.git$/, '')}-README.md`;
+        }
+      } catch (error) {
+        fileName = 'README.md';
+      }
+    }
+
+    const blob = new Blob([markdownOutput], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="generator-container">
       <nav className="navbar">
@@ -99,27 +126,51 @@ const Generator = () => {
                 </button>
               </div>
             </div>
-            <button
-              onClick={handleCopyCode}
-              disabled={!markdownOutput}
-              className="btn-copy-icon"
-              aria-label="Copy code"
-            >
-              <svg
-                stroke="currentColor"
-                fill="none"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                height="1em"
-                width="1em"
-                xmlns="http://www.w3.org/2000/svg"
+            <div className="output-header-actions">
+              <button
+                onClick={handleCopyCode}
+                disabled={!markdownOutput}
+                className="btn-copy-icon"
+                aria-label="Copy code"
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
+                <svg
+                  stroke="currentColor"
+                  fill="none"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  height="1em"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+              <button
+                onClick={handleDownloadFile}
+                disabled={!markdownOutput}
+                className="btn-copy-icon"
+                aria-label="Download file"
+              >
+                <svg
+                  stroke="currentColor"
+                  fill="none"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  height="1em"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+            </div>
           </div>
           {activeTab === 'code' ? (
             <pre className="output-content">
