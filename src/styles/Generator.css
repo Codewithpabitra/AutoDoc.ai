@@ -283,7 +283,7 @@
   border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   height: 510px;
 }
 
@@ -311,6 +311,8 @@
   color: #e4e4e7;
   white-space: pre-wrap;
   word-wrap: break-word;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 .output-content code {
@@ -371,6 +373,72 @@
 
 .markdown-body pre code {
   background-color: transparent !important;
+}
+.output-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #18181b;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: #18181b transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover button:not(:disabled) + .tooltip-text {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-wrapper.show-success .tooltip-text {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  color: var(--accent-color) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  background: rgba(34, 197, 94, 0.1) !important;
+}
+
+.tooltip-wrapper.show-success .tooltip-text::after {
+  border-color: rgba(34, 197, 94, 0.1) transparent transparent transparent;
+}
+
+.tooltip-wrapper.show-success button {
+  color: var(--accent-color) !important;
+  opacity: 1 !important;
+  background: rgba(34, 197, 94, 0.1) !important;
 }
 
 .btn-copy-icon {

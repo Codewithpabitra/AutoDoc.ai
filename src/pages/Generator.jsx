@@ -9,9 +9,10 @@ const Generator = () => {
   const [repoUrl, setRepoUrl] = useState("");
   const [customInstructions, setCustomInstructions] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [markdownOutput, setMarkdownOutput] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [markdownOutput, setMarkdownOutput] = useState('');
   const [activeTab, setActiveTab] = useState('code');
+  const [copied, setCopied] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -27,7 +28,41 @@ const Generator = () => {
     if (!markdownOutput) return;
     navigator.clipboard.writeText(markdownOutput);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  const handleDownloadFile = () => {
+    if (!markdownOutput) return;
+
+    let fileName = 'README.md';
+    if (repoUrl) {
+      try {
+        const parts = repoUrl.trim().split('/');
+        const repoName = parts[parts.length - 1] || parts[parts.length - 2];
+        if (repoName) {
+          fileName = `${repoName.replace(/\.git$/, '')}-README.md`;
+        }
+      } catch (error) {
+        fileName = 'README.md';
+      }
+    }
+
+    const blob = new Blob([markdownOutput], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setDownloaded(true);
+    setTimeout(() => {
+      setDownloaded(false);
+    }, 2000);
   };
 
   return (
@@ -82,15 +117,75 @@ const Generator = () => {
 
         <div className="output-panel">
           <div className="output-header">
-            <h3>Generated Documentation</h3>
-            {markdownOutput && (
-              <button
-                onClick={handleCopyCode}
-                className={`btn btn-copy ${copied ? "copied" : ""}`}
-              >
-                {copied ? "Copied! ✓" : "Copy Code"}
-              </button>
-            )}
+            <div className="output-header-left">
+              <h3>Generated Documentation</h3>
+              <div className="tabs">
+                <button
+                  onClick={() => setActiveTab('code')}
+                  className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
+                >
+                  Code
+                </button>
+                <button
+                  onClick={() => setActiveTab('preview')}
+                  className={`tab-button ${activeTab === 'preview' ? 'active' : ''}`}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+            <div className="output-header-actions">
+              <div className={`tooltip-wrapper ${copied ? 'show-success' : ''}`}>
+                <button
+                  onClick={handleCopyCode}
+                  disabled={!markdownOutput}
+                  className="btn-copy-icon"
+                  aria-label="Copy code"
+                >
+                  <svg
+                    stroke="currentColor"
+                    fill="none"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    height="1em"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+                <span className="tooltip-text">{copied ? 'Copied!' : 'Copy Code'}</span>
+              </div>
+
+              <div className={`tooltip-wrapper ${downloaded ? 'show-success' : ''}`}>
+                <button
+                  onClick={handleDownloadFile}
+                  disabled={!markdownOutput}
+                  className="btn-copy-icon"
+                  aria-label="Download file"
+                >
+                  <svg
+                    stroke="currentColor"
+                    fill="none"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    height="1em"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </button>
+                <span className="tooltip-text">{downloaded ? 'Downloaded!' : 'Download File'}</span>
+              </div>
+            </div>
           </div>
           {activeTab === 'code' ? (
             <pre className="output-content">
