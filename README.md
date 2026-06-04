@@ -88,7 +88,7 @@ npm run dev
 The application will be available at:
 
 ```text
-http://localhost:5173
+http://localhost:3000
 ```
 
 ### 4. Build for Production
@@ -375,7 +375,7 @@ This project is licensed under the **[MIT License](./LICENSE)**.
 The MIT License ensures AutoDoc.ai remains **forever free and open** — use it in your academic projects, hackathons, startup products, or enterprise workflows without restriction. We only ask that you keep the license notice intact and consider contributing improvements back to the community.
 
 ```
-Copyright (c) 2025 Abhro
+Copyright (c) 2026 Abhro
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -414,6 +414,6 @@ _Building tools that make developers' lives easier, one commit at a time._
 
 _"Because great code deserves great documentation."_
 
-<sub>© 2025 AutoDoc.ai · MIT Licensed · Open Source Forever</sub>
+<sub>© 2026 AutoDoc.ai · MIT Licensed · Open Source Forever</sub>
 
 </div>
