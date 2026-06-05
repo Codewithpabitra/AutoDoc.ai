@@ -225,6 +225,36 @@
   transform: translateY(-2px);
 }
 
+.btn-secondary {
+  background: var(--btn-bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--btn-border-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.workspace-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.workspace-buttons .generate-btn {
+  flex: 2;
+  margin-top: 0;
+  width: auto;
+}
+
+.workspace-buttons .clear-btn {
+  flex: 1;
+  justify-content: center;
+}
+
 .btn-copy {
   background: rgba(34, 197, 94, 0.1);
   color: var(--accent-color);

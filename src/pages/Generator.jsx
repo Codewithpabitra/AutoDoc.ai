@@ -24,6 +24,12 @@ const Generator = () => {
     }, 2000);
   };
 
+  const handleClear = () => {
+    setRepoUrl("");
+    setCustomInstructions("");
+    setMarkdownOutput("");
+  };
+
   const handleCopyCode = () => {
     if (!markdownOutput) return;
     navigator.clipboard.writeText(markdownOutput);
@@ -99,20 +105,30 @@ const Generator = () => {
             />
           </div>
 
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="btn btn-primary generate-btn"
-          >
-            {isGenerating ? (
-              <>
-                <span className="spinner"></span>
-                Generating...
-              </>
-            ) : (
-              "Generate Documentation"
-            )}
-          </button>
+          <div className="workspace-buttons">
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="btn btn-primary generate-btn"
+            >
+              {isGenerating ? (
+                <>
+                  <span className="spinner"></span>
+                  Generating...
+                </>
+              ) : (
+                "Generate Documentation"
+              )}
+            </button>
+            <button
+              onClick={handleClear}
+              disabled={isGenerating || (!repoUrl && !customInstructions && !markdownOutput)}
+              className="btn btn-secondary clear-btn"
+              aria-label="Clear workspace"
+            >
+              Clear
+            </button>
+          </div>
         </div>
 
         <div className="output-panel">
