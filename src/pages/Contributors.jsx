@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/Contributors.css';
 
 const fallbackContributors = [
@@ -79,16 +80,7 @@ const Contributors = () => {
 
   return (
     <div className="contributors-page">
-      <nav className="navbar">
-        <div className="nav-logo">
-          AutoDoc.ai
-        </div>
-        <ul className="nav-links">
-          <li><NavLink to="/">Home</NavLink></li>
-          <li><NavLink to="/generator">Generator</NavLink></li>
-          <li><NavLink to="/contributors">Contributors</NavLink></li>
-        </ul>
-      </nav>
+      <Navbar />
 
       <header className="header">
         <h1>Meet Our Contributors</h1>

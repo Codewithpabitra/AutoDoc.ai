@@ -1,20 +1,12 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/Home.css';
 
 const Home = () => {
   return (
     <div className="home-container">
-      <nav className="navbar">
-        <div className="nav-logo">
-          AutoDoc.ai
-        </div>
-        <ul className="nav-links">
-          <li><NavLink to="/">Home</NavLink></li>
-          <li><NavLink to="/generator">Generator</NavLink></li>
-          <li><NavLink to="/contributors">Contributors</NavLink></li>
-        </ul>
-      </nav>
+      <Navbar />
 
       <header className="hero">
         <h1 className="hero-title">

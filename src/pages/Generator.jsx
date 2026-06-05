@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import "../styles/Generator.css";
 
 const Generator = () => {
@@ -22,16 +22,7 @@ const Generator = () => {
 
   return (
     <div className="generator-container">
-      <nav className="navbar">
-        <div className="nav-logo">
-          AutoDoc.ai
-        </div>
-        <ul className="nav-links">
-          <li><NavLink to="/">Home</NavLink></li>
-          <li><NavLink to="/generator">Generator</NavLink></li>
-          <li><NavLink to="/contributors">Contributors</NavLink></li>
-        </ul>
-      </nav>
+      <Navbar />
 
       <main className="workspace">
         <div className="control-panel">
