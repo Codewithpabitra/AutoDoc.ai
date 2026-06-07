@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
-import "github-markdown-css/github-markdown-dark.css";
+import React, { useEffect, useState } from "react";
 import "../styles/Generator.css";
 import Navbar from "../components/Navbar";
 
@@ -38,6 +34,9 @@ const Generator = () => {
   const [markdownOutput, setMarkdownOutput] = useState('');
   const [activeTab, setActiveTab] = useState('code');
   const [copied, setCopied] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   
   // Validation and animation state
   const [error, setError] = useState('');
@@ -49,6 +48,35 @@ const Generator = () => {
       setError('');
     }
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (activeTab !== 'preview') {
+      return undefined;
+    }
+
+    const renderPreview = async () => {
+      setIsPreviewLoading(true);
+      const [{ marked }, DOMPurify] = await Promise.all([
+        import("marked"),
+        import("dompurify"),
+        import("github-markdown-css/github-markdown-dark.css"),
+      ]);
+
+      if (!isMounted) return;
+
+      const source = markdownOutput || '# Your documentation will appear here...';
+      setPreviewHtml(DOMPurify.default.sanitize(marked.parse(source)));
+      setIsPreviewLoading(false);
+    };
+
+    renderPreview();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, markdownOutput]);
 
   const handleGenerate = async () => {
     const trimmedUrl = repoUrl.trim();
@@ -296,6 +324,8 @@ const Generator = () => {
                   aria-label="Copy code"
                 >
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     stroke="currentColor"
                     fill="none"
                     strokeWidth="2"
@@ -321,6 +351,8 @@ const Generator = () => {
                   aria-label="Download file"
                 >
                   <svg
+                    aria-hidden="true"
+                    focusable="false"
                     stroke="currentColor"
                     fill="none"
                     strokeWidth="2"
@@ -348,7 +380,9 @@ const Generator = () => {
             <div
               className="output-content markdown-body"
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(marked.parse(markdownOutput || '# Your documentation will appear here...')),
+                __html: isPreviewLoading
+                  ? '<p>Loading preview...</p>'
+                  : previewHtml,
               }}
             />
           )}

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Home.css";
 import Navbar from "../components/Navbar";
+import logoUrl from "../../autodoc.png";
 
 function Home() {
   useEffect(() => {
@@ -12,7 +13,16 @@ function Home() {
     <div className="home-container">
       <Navbar />
 
-      <header className="hero">
+      <main className="hero">
+        <img
+          className="hero-logo"
+          src={logoUrl}
+          width="80"
+          height="80"
+          alt="AutoDoc.ai logo"
+          decoding="async"
+          fetchPriority="high"
+        />
         <h1 className="hero-title">
           Start your documentation informed. <br />
           <span className="highlight-tag">Not manual-bound.</span>
@@ -35,6 +45,8 @@ function Home() {
             className="btn btn-secondary"
           >
             <svg
+              aria-hidden="true"
+              focusable="false"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -46,7 +58,7 @@ function Home() {
             Documentation
           </a>
         </div>
-      </header>
+      </main>
 
       <footer>
         <p>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import "./Navbar.css";
 
 const Navbar = () => {
   // Move the state and toggle function inside the Navbar component
@@ -14,17 +15,21 @@ const Navbar = () => {
       <div className="nav-logo">AutoDoc.ai</div>
 
       {/* Hamburger Icon */}
-      <div
+      <button
+        type="button"
         className={`hamburger ${isOpen ? "toggle" : ""}`}
         onClick={toggleMenu}
+        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={isOpen}
+        aria-controls="primary-navigation"
       >
         <div className="line1"></div>
         <div className="line2"></div>
         <div className="line3"></div>
-      </div>
+      </button>
 
       {/* Links Menu */}
-      <ul className={`nav-links ${isOpen ? "open" : ""}`}>
+      <ul id="primary-navigation" className={`nav-links ${isOpen ? "open" : ""}`}>
         <li>
           <NavLink to="/" onClick={toggleMenu}>
             Home
