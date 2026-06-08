@@ -51,6 +51,21 @@ const readEnv = (env, key) => String(env[key] || "").trim();
 
 const normalizeBaseUrl = (url) => url.replace(/\/+$/, "");
 
+const formatList = (items) => {
+  if (items.length <= 1) {
+    return items[0] || "";
+  }
+
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+};
+
+const createPublicError = (message, statusCode = 500) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.expose = true;
+  return error;
+};
+
 const asNumber = (value, fallback) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -101,19 +116,24 @@ const resolveProvider = (env) => {
   }[provider];
 
   if (!provider || !config) {
-    throw new Error("Set LLM_PROVIDER to openai, nvidia, anthropic, claude, gemini, or custom.");
+    throw createPublicError("Set LLM_PROVIDER to openai, nvidia, anthropic, claude, gemini, or custom.");
   }
 
   if (!config.apiKey || !config.baseUrl || !config.model) {
-    throw new Error(`Set the API key, base URL, and model for the ${provider} provider.`);
+    const missing = [
+      !config.apiKey ? "API key" : "",
+      !config.baseUrl ? "base URL" : "",
+      !config.model ? "model" : "",
+    ].filter(Boolean);
+    throw createPublicError(`Set the ${formatList(missing)} for the ${provider} provider.`);
   }
 
   if (config.type === "anthropic" && !config.version) {
-    throw new Error("Set ANTHROPIC_VERSION or CUSTOM_ANTHROPIC_VERSION for Anthropic-compatible providers.");
+    throw createPublicError("Set ANTHROPIC_VERSION or CUSTOM_ANTHROPIC_VERSION for Anthropic-compatible providers.");
   }
 
   if (!["openai", "anthropic", "gemini"].includes(config.type)) {
-    throw new Error("Set CUSTOM_PROVIDER_TYPE to openai, anthropic, or gemini.");
+    throw createPublicError("Set CUSTOM_PROVIDER_TYPE to openai, anthropic, or gemini.");
   }
 
   return {
@@ -345,7 +365,7 @@ export const generateReadmeHandler = async (req, res, env = process.env) => {
     return sendJson(res, 200, { markdown: markdown.trim() });
   } catch (error) {
     return sendJson(res, error.statusCode || 500, {
-      error: error.statusCode ? error.message : "Documentation generation failed. Check server configuration and provider logs.",
+      error: error.expose ? error.message : "Documentation generation failed. Check server configuration and provider logs.",
     });
   }
 };
