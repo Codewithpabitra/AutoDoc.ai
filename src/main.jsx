@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import App from "./pages/App.jsx";
+import App from './App';
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { optimizeResourceHints, monitorPerformance } from "./utils/performanceOptimization.js";
 import "./styles/theme.css";

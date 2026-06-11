@@ -1,17 +1,26 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Home.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Home() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = "Home | AutoDoc.ai";
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="home-container">
-      <Navbar />
+      <Navbar user={user} onLogout={handleLogout} />
 
       <main className="hero">
         <h1 className="hero-title">
@@ -51,9 +60,7 @@ function Home() {
         </div>
       </main>
 
-
       <Footer />
-
     </div>
   );
 }

@@ -1,14 +1,23 @@
+
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import "./Navbar.css";
 
 const Navbar = () => {
-  // Move the state and toggle function inside the Navbar component
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+    setIsOpen(false);
   };
 
   return (
@@ -34,9 +43,23 @@ const Navbar = () => {
             Contributors
           </NavLink>
         </li>
+        {user && (
+          <li className="logout-mobile">
+            <button onClick={handleLogout} className="logout-btn-mobile">
+              Logout
+            </button>
+          </li>
+        )}
       </ul>
 
       <div className="nav-actions">
+        {user && (
+          <div className="user-info">
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
+        )}
         <ThemeToggle />
 
         {/* Hamburger Icon */}
