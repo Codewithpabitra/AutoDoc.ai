@@ -1,7 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { getAuthErrorMessage } from '../utils/authErrors';
 
 const AuthContext = createContext();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -38,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (name, email, password) => {
     try {
       console.log('Signup attempt:', { name, email });
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
         name,
         email,
         password
@@ -56,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Signup error:', error.response?.data || error.message);
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Signup failed. Please try again.' 
+        error: getAuthErrorMessage(error, 'Signup failed. Please try again.')
       };
     }
   };
@@ -64,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       console.log('Login attempt:', { email });
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password
       });
@@ -81,7 +83,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error.response?.data || error.message);
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Login failed. Please try again.' 
+        error: getAuthErrorMessage(error, 'Login failed. Please try again.')
       };
     }
   };

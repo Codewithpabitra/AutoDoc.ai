@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { getRegisterValidationMessage } from "../utils/authValidation.js";
 
 const router = express.Router();
 
@@ -9,17 +10,29 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const validationMessage = getRegisterValidationMessage({ name, email, password });
 
-    const existingUser = await User.findOne({ email });
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("Register error: JWT_SECRET is not configured");
+      return res.status(500).json({ message: "Unable to create an account right now." });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in instead." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -41,7 +54,12 @@ router.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("Register error:", error);
-    res.status(500).json({ message: "Server error" });
+
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "An account with this email already exists. Please sign in instead." });
+    }
+
+    res.status(500).json({ message: "Unable to create an account right now." });
   }
 });
 
