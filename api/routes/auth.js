@@ -1,13 +1,39 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import User from "../models/User.js";
 import { getRegisterValidationMessage } from "../utils/authValidation.js";
 
 const router = express.Router();
 
+// ================= RATE LIMITERS =================
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per IP
+  message: {
+    success: false,
+    message: "Too many login attempts. Please try again after 15 minutes.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // 10 registrations per IP
+  message: {
+    success: false,
+    message: "Too many accounts created. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // ========== REGISTER ==========
-router.post("/register", async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const validationMessage = getRegisterValidationMessage({ name, email, password });
@@ -64,7 +90,7 @@ router.post("/register", async (req, res) => {
 });
 
 // ========== LOGIN ==========
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
