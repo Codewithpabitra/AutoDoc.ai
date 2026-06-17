@@ -6,6 +6,7 @@ import crypto from "crypto";
 import nodemailer from "nodemailer"; 
 import User from "../models/User.js";
 import { getRegisterValidationMessage } from "../utils/authValidation.js";
+import { getSupabaseAdmin } from "../utils/supabaseAdmin.js";
 
 const router = express.Router();
 
@@ -120,7 +121,7 @@ router.post("/login", loginLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) {
+    if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -151,116 +152,76 @@ router.post("/login", loginLimiter, async (req, res) => {
   }
 });
 
-// ============================================
-// ✅ NEW: FORGOT PASSWORD (WITH EMAIL)
-// ============================================
-router.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
+// ========== SUPABASE OAUTH ==========
+router.post("/supabase", async (req, res) => {
   try {
-    const { email } = req.body;
+    const { accessToken } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ success: false, message: "Email is required" });
+    if (!accessToken) {
+      return res.status(400).json({ message: "Access token is required" });
     }
 
-    const user = await User.findOne({ email: email.trim().toLowerCase() });
-    if (!user) {
-      return res.status(404).json({ success: false, message: "No user found with this email" });
+    const supabase = getSupabaseAdmin();
+    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(accessToken);
+
+    if (error || !supabaseUser) {
+      return res.status(401).json({ message: "Invalid or expired access token" });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    const email = supabaseUser.email;
+    const userMeta = supabaseUser.user_metadata || {};
+    const provider = supabaseUser.app_metadata?.provider || 'email';
+    const name = userMeta.full_name || userMeta.name || email?.split('@')[0] || 'User';
+    const avatarUrl = userMeta.avatar_url || userMeta.picture || null;
 
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = resetTokenExpiry;
+    let user = await User.findOne({
+      $or: [
+        { supabaseId: supabaseUser.id },
+        { email: email?.toLowerCase() },
+      ],
+    });
+
+    if (user) {
+      if (!user.supabaseId) user.supabaseId = supabaseUser.id;
+      if (!user.avatarUrl && avatarUrl) user.avatarUrl = avatarUrl;
+      user.authProvider = provider;
+      if (!user.name || user.name === email?.split('@')[0]) {
+        user.name = name;
+      }
+    } else {
+      user = new User({
+        name,
+        email: email?.toLowerCase(),
+        password: null,
+        supabaseId: supabaseUser.id,
+        avatarUrl,
+        authProvider: provider,
+      });
+    }
+
     await user.save();
 
-    // Reset link
-    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const token = jwt.sign(
+      { id: user._id, email: user.email, name: user.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    //  Email Configuration
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    res.json({
+      success: true,
+      message: "Authentication successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        authProvider: user.authProvider,
       },
     });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: '🔑 Password Reset Request - AutoDoc.ai',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; background: #0d0d0d; color: #fff; border-radius: 12px; border: 1px solid #22c55e;">
-          <h1 style="color: #22c55e; text-align: center;">AutoDoc.ai</h1>
-          <h2 style="text-align: center; color: #fff;">Reset Your Password</h2>
-          <p style="color: #ccc; text-align: center;">We received a request to reset your password. Click the button below to set a new password:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="background: #22c55e; color: #000; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block;">
-              Reset Password
-            </a>
-          </div>
-          <p style="color: #888; font-size: 0.8rem; text-align: center;">This link expires in <strong style="color: #fff;">1 hour</strong>.</p>
-          <p style="color: #555; font-size: 0.75rem; text-align: center; margin-top: 20px;">If you didn't request this, please ignore this email.</p>
-          <hr style="border-color: #222;">
-          <p style="color: #444; font-size: 0.65rem; text-align: center;">AutoDoc.ai - AI-powered documentation generator</p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-
- 
-    res.json({
-      success: true,
-      message: "Password reset link sent to your email",
-    });
   } catch (error) {
-    console.error("Forgot Password Error:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-});
-
-// ============================================
-//  NEW: RESET PASSWORD
-// ============================================
-router.post("/reset-password", resetPasswordLimiter, async (req, res) => {
-  try {
-    const { token, newPassword } = req.body;
-
-    if (!token || !newPassword) {
-      return res.status(400).json({ success: false, message: "Token and new password are required" });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
-    }
-
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    user.password = hashedPassword;
-    user.resetToken = null;
-    user.resetTokenExpiry = null;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Password reset successfully! You can now login with your new password.",
-    });
-  } catch (error) {
-    console.error("Reset Password Error:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Supabase auth error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

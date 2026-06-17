@@ -147,7 +147,14 @@ body {
   font-size: 11px;
 }
 
-.github-button {
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.oauth-button {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -164,30 +171,30 @@ body {
   transition: 0.3s;
 }
 
-.github-button:hover {
+.oauth-button:hover {
   border-color: #22c55e;
   background: #151515;
 }
 
-.github-icon {
+.oauth-icon {
   width: 18px;
   height: 18px;
 }
 
-.signup-link {
+.oauth-divider {
   text-align: center;
-  margin-top: 8px;
+  margin-top: 12px;
   color: #888;
   font-size: 0.8rem;
 }
 
-.signup-link a {
+.oauth-divider a {
   color: #22c55e;
   text-decoration: none;
   font-weight: 600;
 }
 
-.signup-link a:hover {
+.oauth-divider a:hover {
   color: #4ade80;
 }
 
