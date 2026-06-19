@@ -299,6 +299,36 @@
   color: var(--text-secondary);
 }
 
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  background: var(--btn-bg-secondary);
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.tab-button {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  background: var(--accent-color);
+  color: #000000;
+}
+
 .output-content {
   flex: 1;
   padding: 1.75rem;
@@ -353,14 +383,33 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -414,19 +463,31 @@
 }
 
 .char-counter.warning {
-  color: #f59e0b; /* Amber/Orange warning color */
+  color: #f59e0b;
+  /* Amber/Orange warning color */
 }
 
 .char-counter.limit {
-  color: #ef4444; /* Red limit reached color */
+  color: #ef4444;
+  /* Red limit reached color */
   font-weight: 600;
   animation: shake 0.3s ease-in-out;
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 /* ─── Job Progress Panel ─── */
@@ -484,8 +545,13 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .job-progress-message {
