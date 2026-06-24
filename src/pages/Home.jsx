@@ -1,26 +1,20 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Home.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Home() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     document.title = "Home | AutoDoc.ai";
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   return (
     <div className="home-container">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar />
 
       <main className="hero">
         <h1 className="hero-title">
@@ -35,9 +29,20 @@ function Home() {
         </p>
 
         <div className="button-group">
-          <Link to="/generator" className="btn btn-primary">
-            Try it Now
-          </Link>
+          {user ? (
+            <Link to="/generator" className="btn btn-primary">
+              Try it Now
+            </Link>
+          ) : (
+            <>
+              <Link to="/signup" className="btn btn-primary">
+                Get Started
+              </Link>
+              <Link to="/login" className="btn btn-secondary">
+                Sign In
+              </Link>
+            </>
+          )}
           <a
             href="https://github.com/abhro05/AutoDoc.ai"
             target="_blank"

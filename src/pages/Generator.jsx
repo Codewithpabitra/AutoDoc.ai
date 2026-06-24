@@ -196,8 +196,35 @@ const Generator = () => {
       setIsGenerating(false);
       es.close();
     };
+
+    return () => {
+      es.close();
+    };
   }, []);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem("autodoc_repo_url", repoUrl);
+    } catch (e) {
+      console.warn("Failed to save repoUrl to localStorage:", e);
+    }
+  }, [repoUrl]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("autodoc_custom_instructions", customInstructions);
+    } catch (e) {
+      console.warn("Failed to save customInstructions to localStorage:", e);
+    }
+  }, [customInstructions]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("autodoc_markdown_output", markdownOutput);
+    } catch (e) {
+      console.warn("Failed to save markdownOutput to localStorage:", e);
+    }
+  }, [markdownOutput]);
 
   const handleGenerate = async () => {
     const trimmedUrl = repoUrl.trim();

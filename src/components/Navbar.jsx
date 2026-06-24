@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import "./Navbar.css";
@@ -16,7 +16,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
     setIsOpen(false);
   };
 
@@ -26,7 +26,6 @@ const Navbar = () => {
         <div className="nav-logo">AutoDoc.ai</div>
       </div>
 
-      {/* Links Menu */}
       <ul id="primary-navigation" className={`nav-links ${isOpen ? "open" : ""}`}>
         <li>
           <NavLink to="/" onClick={toggleMenu}>
@@ -43,26 +42,39 @@ const Navbar = () => {
             Contributors
           </NavLink>
         </li>
-        {user && (
+        {user ? (
           <li className="logout-mobile">
             <button onClick={handleLogout} className="logout-btn-mobile">
               Logout
             </button>
           </li>
+        ) : (
+          <>
+            <li className="login-mobile">
+              <Link to="/login" onClick={toggleMenu}>Login</Link>
+            </li>
+            <li className="signup-mobile">
+              <Link to="/signup" onClick={toggleMenu}>Sign Up</Link>
+            </li>
+          </>
         )}
       </ul>
 
       <div className="nav-actions">
-        {user && (
+        {user ? (
           <div className="user-info">
             <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
           </div>
+        ) : (
+          <div className="auth-links">
+            <Link to="/login" className="nav-login-btn">Login</Link>
+            <Link to="/signup" className="nav-signup-btn">Sign Up</Link>
+          </div>
         )}
         <ThemeToggle />
 
-        {/* Hamburger Icon */}
         <button
           type="button"
           className={`hamburger ${isOpen ? "toggle" : ""}`}
