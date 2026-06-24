@@ -10,6 +10,7 @@ import Generator from './pages/Generator';
 import Contributors from './pages/Contributors';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -40,6 +41,9 @@ function App() {
             <Contributors />
           </ProtectedRoute>
         } />
+
+        {/* Catch-all 404 route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
   );
