@@ -5,7 +5,7 @@ import { getRegisterValidationMessage } from "../utils/authValidation.js";
 import { getSupabaseAdmin } from "../utils/supabaseAdmin.js";
 
 // ========== REGISTER ==========
-export const register =  async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const validationMessage = getRegisterValidationMessage({ name, email, password });
@@ -65,7 +65,14 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+    const normalizedEmail = email.trim().toLowerCase()
+
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
