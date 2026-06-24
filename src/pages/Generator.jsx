@@ -62,6 +62,15 @@ const Generator = () => {
       return "";
     }
   });
+  const [versionHistory, setVersionHistory] = useState(() => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("autodoc_version_history") || "[]"
+    );
+  } catch {
+    return [];
+  }
+});
   const [activeTab, setActiveTab] = useState('code');
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
@@ -76,6 +85,7 @@ const Generator = () => {
   const [jobProgress, setJobProgress] = useState({ filesProcessed: 0, totalFiles: 0 });
   const eventSourceRef = useRef(null);
 
+  const [previousMarkdown, setPreviousMarkdown] = useState("");
   // Cleanup SSE on unmount
   useEffect(() => {
     return () => {
@@ -85,31 +95,18 @@ const Generator = () => {
     };
   }, []);
 
-  // Save to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("autodoc_repo_url", repoUrl);
-    } catch (e) {
-      console.warn("Failed to save repoUrl to localStorage:", e);
-    }
-  }, [repoUrl]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("autodoc_custom_instructions", customInstructions);
-    } catch (e) {
-      console.warn("Failed to save customInstructions to localStorage:", e);
-    }
-  }, [customInstructions]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("autodoc_markdown_output", markdownOutput);
-    } catch (e) {
-      console.warn("Failed to save markdownOutput to localStorage:", e);
-    }
-  }, [markdownOutput]);
-
+  
+useEffect(() => {
+  try {
+    localStorage.setItem(
+      "autodoc_version_history",
+      JSON.stringify(versionHistory)
+    );
+  } catch (e) {
+    console.warn("Failed to save version history:", e);
+  }
+}, [versionHistory]);
   const handleUrlChange = (e) => {
     setRepoUrl(e.target.value);
     if (error) {
@@ -173,12 +170,30 @@ const Generator = () => {
         }
 
         if (data.status === "completed") {
-          setMarkdownOutput(data.markdown || '');
-          setIsGenerating(false);
-          setJobPhase('completed');
-          setJobMessage('Documentation generated successfully!');
-          es.close();
-        } else if (data.status === "failed") {
+
+  if (
+  previousMarkdown &&
+  data.markdown &&
+  previousMarkdown !== data.markdown
+) {
+    setVersionHistory((prev) => [
+      {
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        repoUrl,
+        content: previousMarkdown,
+      },
+      ...prev,
+    ]);
+  }
+
+  setMarkdownOutput(data.markdown || '');
+  setIsGenerating(false);
+  setJobPhase('completed');
+  setJobMessage('Documentation generated successfully!');
+  es.close();
+}
+else if (data.status === "failed") {
           setError(data.error || data.message || "Generation failed.");
           setIsGenerating(false);
           setJobPhase('failed');
@@ -247,6 +262,7 @@ const Generator = () => {
     setJobPhase('queued');
     setJobMessage('Submitting job...');
     setJobProgress({ filesProcessed: 0, totalFiles: 0 });
+    setPreviousMarkdown(markdownOutput);
     setMarkdownOutput('');
     setError('');
 
@@ -293,9 +309,24 @@ const Generator = () => {
         connectToJobStatus(data.jobId);
       } else if (data.markdown) {
         // Synchronous fallback
-        setMarkdownOutput(data.markdown);
-        setIsGenerating(false);
-        setJobPhase('completed');
+        if (
+  previousMarkdown &&
+  previousMarkdown !== data.markdown
+) {
+  setVersionHistory((prev) => [
+    {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      repoUrl,
+      content: previousMarkdown,
+    },
+    ...prev,
+  ]);
+}
+
+setMarkdownOutput(data.markdown);
+setIsGenerating(false);
+setJobPhase('completed');
       }
     } catch (e) {
       setError(e.message);
@@ -305,7 +336,9 @@ const Generator = () => {
       setTimeout(() => setShouldShake(false), 400);
     }
   };
-
+const restoreVersion = (version) => {
+  setMarkdownOutput(version.content);
+};
   const handleClear = () => {
     setRepoUrl("");
     setCustomInstructions("");
@@ -587,6 +620,26 @@ const Generator = () => {
           <div className="output-header">
             <div className="output-header-left">
               <h3>Generated Documentation</h3>
+              {versionHistory.length > 0 && (
+  <div className="version-history-panel">
+    <h4>Version History</h4>
+
+    {versionHistory.slice(0, 5).map((version) => (
+      <div key={version.id} className="version-item">
+        <span>
+          {new Date(version.timestamp).toLocaleString()}
+        </span>
+
+        <button
+          onClick={() => restoreVersion(version)}
+          className="btn btn-secondary"
+        >
+          Restore
+        </button>
+      </div>
+    ))}
+  </div>
+)}
               <div className="tabs">
                 <button
                   onClick={() => setActiveTab('code')}
