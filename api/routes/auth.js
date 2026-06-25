@@ -8,6 +8,7 @@ import User from "../models/User.js";
 import { getRegisterValidationMessage } from "../utils/authValidation.js";
 import { getSupabaseAdmin } from "../utils/supabaseAdmin.js";
 import { loginLimiter, registerLimiter, forgotPasswordLimiter, resetPasswordLimiter } from "../middleware/rateLimiter.js";
+import { register,login , supabaseLogin} from "../controllers/authController.js"
 
 const router = express.Router();
 
